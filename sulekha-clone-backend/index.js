@@ -8,7 +8,7 @@ const requirementRoutes = require("./routes/requirements");
 
 const app = express();
 app.use(cors({
-  origin: "https://sulekha-clone-client-working.vercel.app", // use your actual frontend URL
+  origin: "https://sulekha-clonee1.vercel.app", // use your actual frontend URL
   credentials: true
 }));
 app.use(express.json());
