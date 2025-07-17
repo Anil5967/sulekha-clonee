@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sulekha Clone - GitHub-Style Authentication</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #f26522;
+            --secondary: #2d3192;
+            --light: #f8f9fa;
+            --dark: #24292e;
+            --gray: #6a737d;
+            --light-gray: #e1e4e8;
+            --white: #ffffff;
+            --border: #d1d5da;
+            --success: #28a745;
+            --error: #cb2431;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        /* Header Styles */
+        .top-header {
+            background-color: var(--secondary);
+            color: white;
+            padding: 8px 0;
+            font-size: 14px;
+        }
+        
+        .top-header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 15px;
+        }
+        
+        .location-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        
+        .location-selector i {
+            color: var(--primary);
+        }
+        
+        .top-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+        
+        .top-links a:hover {
+            color: var(--primary);
+        }
+        
+        .main-header {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+        }
+        
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo span {
+            color: var(--secondary);
+        }
+        
+        .header-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .post-ad-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .login-btn {
+            background: white;
+            color: var(--secondary);
+            border: 1px solid var(--secondary);
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        /* Auth Container */
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-grow: 1;
+            padding: 40px 20px;
+            background: url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80') no-repeat center center;
+            background-size: cover;
+            position: relative;
+        }
+        
+        .auth-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(45, 49, 146, 0.85);
+        }
+        
+        .auth-box {
+            position: relative;
+            z-index: 1;
+            background: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            width: 100%;
+            max-width: 340px;
+            overflow: hidden;
+        }
+        
+        .auth-header {
+            padding: 24px;
+            text-align: center;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        .auth-header h2 {
+            font-size: 24px;
+            margin-bottom: 8px;
+            color: var(--dark);
+        }
+        
+        .auth-header p {
+            color: var(--gray);
+            font-size: 14px;
+        }
+        
+        .auth-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        .auth-tab {
+            flex: 1;
+            text-align: center;
+            padding: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            color: var(--gray);
+            transition: all 0.3s;
+        }
+        
+        .auth-tab.active {
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+            font-weight: 600;
+        }
+        
+        .auth-content {
+            padding: 24px;
+        }
+        
+        .auth-form {
+            display: none;
+        }
+        
+        .auth-form.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 14px;
+            color: var(--dark);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 14px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background-color: var(--light);
+            transition: border-color 0.15s ease-in-out;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(242, 101, 34, 0.15);
+        }
+        
+        .password-container {
+            position: relative;
+        }
+        
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--gray);
+            cursor: pointer;
+        }
+        
+        .btn-block {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.15s ease-in-out;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+        
+        .btn-primary:hover {
+            background-color: #e05a1a;
+        }
+        
+        .auth-footer {
+            padding: 16px 24px;
+            text-align: center;
+            border-top: 1px solid var(--light-gray);
+            font-size: 14px;
+            color: var(--gray);
+        }
+        
+        .auth-footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+        
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .error-message {
+            color: var(--error);
+            font-size: 13px;
+            margin-top: 8px;
+            display: none;
+        }
+        
+        .success-message {
+            color: var(--success);
+            font-size: 13px;
+            margin-top: 8px;
+            display: none;
+        }
+        
+        /* Footer */
+        .footer {
+            background-color: #1a1c4d;
+            color: white;
+            padding: 40px 0 0;
+        }
+        
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+        }
+        
+        .footer-column h3 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 30px;
+            height: 2px;
+            background: var(--primary);
+        }
+        
+        .footer-links {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+        
+        .footer-links a {
+            color: #b0b1c5;
+            text-decoration: none;
+            transition: color 0.3s;
+            font-size: 14px;
+        }
+        
+        .footer-links a:hover {
+            color: var(--primary);
+        }
+        
+        .copyright {
+            text-align: center;
+            padding: 20px 0;
+            margin-top: 40px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: #b0b1c5;
+            font-size: 14px;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .top-header-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .top-links {
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                flex-wrap: wrap;
+            }
+            
+            .top-links a {
+                margin-left: 0;
+                margin-right: 15px;
+            }
+            
+            .header-container {
+                flex-wrap: wrap;
+            }
+            
+            .header-buttons {
+                width: 100%;
+                margin-top: 15px;
+                justify-content: center;
+            }
+            
+            .auth-container {
+                padding: 20px;
+            }
+            
+            .auth-box {
+                max-width: 100%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .auth-tab {
+                padding: 12px;
+                font-size: 14px;
+            }
+            
+            .auth-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Header -->
+    <div class="top-header">
+        <div class="top-header-container">
+            <div class="location-selector">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>Hyderabad</span>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="top-links">
+                <a href="#"><i class="fas fa-question-circle"></i> Help</a>
+                <a href="#"><i class="fas fa-star"></i> Featured Services</a>
+                <a href="#"><i class="fas fa-bullhorn"></i> Advertise</a>
+                <a href="#"><i class="fas fa-phone-alt"></i> Contact</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Header -->
+    <header class="main-header">
+        <div class="header-container">
+            <a href="#" class="logo">
+                <span>Sulekha</span>
+            </a>
+            
+            <div class="header-buttons">
+                <button class="post-ad-btn"><i class="fas fa-plus"></i> Post Free Ad</button>
+                <button class="login-btn" id="mainLoginBtn"><i class="fas fa-user"></i> Login</button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Auth Container -->
+    <div class="auth-container">
+        <div class="auth-box">
+            <div class="auth-header">
+                <h2>Welcome to Sulekha</h2>
+                <p>Find the best local services</p>
+            </div>
+            
+            <div class="auth-tabs">
+                <div class="auth-tab active" data-tab="login">Sign in</div>
+                <div class="auth-tab" data-tab="register">Sign up</div>
+            </div>
+            
+            <!-- Login Form -->
+            <div class="auth-content">
+                <form class="auth-form active" id="loginForm">
+                    <div class="form-group">
+                        <label for="loginEmail">Email address</label>
+                        <input type="email" id="loginEmail" class="form-control" placeholder="Enter your email" required>
+                        <div class="error-message" id="loginEmailError">Please enter a valid email address</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="loginPassword">Password</label>
+                        <div class="password-container">
+                            <input type="password" id="loginPassword" class="form-control" placeholder="Enter your password" required>
+                            <button type="button" class="password-toggle" id="loginPasswordToggle">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="error-message" id="loginPasswordError">Password must be at least 6 characters</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <button type="submit" class="btn-block btn-primary">Sign in</button>
+                    </div>
+                    
+                    <div class="success-message" id="loginSuccess">Login successful! Redirecting...</div>
+                </form>
+                
+                <!-- Registration Form -->
+                <form class="auth-form" id="registerForm">
+                    <div class="form-group">
+                        <label for="registerName">Full Name</label>
+                        <input type="text" id="registerName" class="form-control" placeholder="Enter your full name" required>
+                        <div class="error-message" id="registerNameError">Please enter your full name</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="registerEmail">Email address</label>
+                        <input type="email" id="registerEmail" class="form-control" placeholder="Enter your email" required>
+                        <div class="error-message" id="registerEmailError">Please enter a valid email address</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="registerPassword">Password</label>
+                        <div class="password-container">
+                            <input type="password" id="registerPassword" class="form-control" placeholder="Create a password" required>
+                            <button type="button" class="password-toggle" id="registerPasswordToggle">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="error-message" id="registerPasswordError">Password must be at least 8 characters</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="registerPhone">Phone Number</label>
+                        <input type="tel" id="registerPhone" class="form-control" placeholder="Enter your phone number" required>
+                        <div class="error-message" id="registerPhoneError">Please enter a valid phone number</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <button type="submit" class="btn-block btn-primary">Create account</button>
+                    </div>
+                    
+                    <div class="success-message" id="registerSuccess">Registration successful! Redirecting to login...</div>
+                </form>
+            </div>
+            
+            <div class="auth-footer">
+                <p>By signing in, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-column">
+                <h3>Popular Services</h3>
+                <ul class="footer-links">
+                    <li><a href="#">Home Cleaning</a></li>
+                    <li><a href="#">AC Repair</a></li>
+                    <li><a href="#">Plumbing Services</a></li>
+                    <li><a href="#">Electricians</a></li>
+                    <li><a href="#">Pest Control</a></li>
+                    <li><a href="#">Carpenters</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-column">
+                <h3>Popular Cities</h3>
+                <ul class="footer-links">
+                    <li><a href="#">Hyderabad</a></li>
+                    <li><a href="#">Bangalore</a></li>
+                    <li><a href="#">Chennai</a></li>
+                    <li><a href="#">Mumbai</a></li>
+                    <li><a href="#">Delhi</a></li>
+                    <li><a href="#">Pune</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-column">
+                <h3>Company</h3>
+                <ul class="footer-links">
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Careers</a></li>
+                    <li><a href="#">Contact Us</a></li>
+                    <li><a href="#">Press</a></li>
+                    <li><a href="#">Testimonials</a></li>
+                    <li><a href="#">Sitemap</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-column">
+                <h3>Support</h3>
+                <ul class="footer-links">
+                    <li><a href="#">Help Center</a></li>
+                    <li><a href="#">FAQs</a></li>
+                    <li><a href="#">Terms of Use</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Feedback</a></li>
+                    <li><a href="#">Complaints</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="copyright">
+            &copy; 2023 Sulekha Clone. All rights reserved.
+        </div>
+    </footer>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const loginTab = document.querySelector('[data-tab="login"]');
+            const registerTab = document.querySelector('[data-tab="register"]');
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const loginPasswordToggle = document.getElementById('loginPasswordToggle');
+            const registerPasswordToggle = document.getElementById('registerPasswordToggle');
+            const mainLoginBtn = document.getElementById('mainLoginBtn');
+            
+            // Tab Switching
+            function switchTab(tab) {
+                // Update active tab
+                document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // Show active form
+                document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+                document.getElementById(`${tab.dataset.tab}Form`).classList.add('active');
+            }
+            
+            loginTab.addEventListener('click', () => switchTab(loginTab));
+            registerTab.addEventListener('click', () => switchTab(registerTab));
+            
+            // Password visibility toggle
+            function togglePasswordVisibility(inputId, toggleBtn) {
+                const passwordInput = document.getElementById(inputId);
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                
+                // Update icon
+                toggleBtn.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+            }
+            
+            loginPasswordToggle.addEventListener('click', () => togglePasswordVisibility('loginPassword', loginPasswordToggle));
+            registerPasswordToggle.addEventListener('click', () => togglePasswordVisibility('registerPassword', registerPasswordToggle));
+            
+            // Login Form Validation
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
+                let isValid = true;
+                
+                // Reset errors
+                document.querySelectorAll('#loginForm .error-message').forEach(el => el.style.display = 'none');
+                
+                // Email validation
+                if (!validateEmail(email)) {
+                    document.getElementById('loginEmailError').style.display = 'block';
+                    isValid = false;
+                }
+                
+                // Password validation
+                if (password.length < 6) {
+                    document.getElementById('loginPasswordError').style.display = 'block';
+                    isValid = false;
+                }
+                
+                if (isValid) {
+                    // Simulate successful login
+                    const successMsg = document.getElementById('loginSuccess');
+                    successMsg.style.display = 'block';
+                    
+                    // Redirect after delay
+                    setTimeout(() => {
+                        window.location.href = 'https://sulekha-clonee-3.onrender.com';
+                    }, 1500);
+                }
+            });
+            
+            // Registration Form Validation
+            registerForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const name = document.getElementById('registerName').value;
+                const email = document.getElementById('registerEmail').value;
+                const password = document.getElementById('registerPassword').value;
+                const phone = document.getElementById('registerPhone').value;
+                let isValid = true;
+                
+                // Reset errors
+                document.querySelectorAll('#registerForm .error-message').forEach(el => el.style.display = 'none');
+                
+                // Name validation
+                if (name.trim() === '') {
+                    document.getElementById('registerNameError').style.display = 'block';
+                    isValid = false;
+                }
+                
+                // Email validation
+                if (!validateEmail(email)) {
+                    document.getElementById('registerEmailError').style.display = 'block';
+                    isValid = false;
+                }
+                
+                // Password validation
+                if (password.length < 8) {
+                    document.getElementById('registerPasswordError').style.display = 'block';
+                    isValid = false;
+                }
+                
+                // Phone validation
+                if (!validatePhone(phone)) {
+                    document.getElementById('registerPhoneError').style.display = 'block';
+                    isValid = false;
+                }
+                
+                if (isValid) {
+                    // Simulate successful registration
+                    const successMsg = document.getElementById('registerSuccess');
+                    successMsg.style.display = 'block';
+                    
+                    // Redirect to login after delay
+                    setTimeout(() => {
+                        switchTab(loginTab);
+                        successMsg.style.display = 'none';
+                        registerForm.reset();
+                    }, 2000);
+                }
+            });
+            
+            // Main login button
+            mainLoginBtn.addEventListener('click', function() {
+                // Scroll to auth section
+                document.querySelector('.auth-container').scrollIntoView({ behavior: 'smooth' });
+            });
+            
+            // Validation functions
+            function validateEmail(email) {
+                const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return re.test(email);
+            }
+            
+            function validatePhone(phone) {
+                const re = /^[0-9]{10}$/;
+                return re.test(phone);
+            }
+        });
+    </script>
+</body>
+</html>
