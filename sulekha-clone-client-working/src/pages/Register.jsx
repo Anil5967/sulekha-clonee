@@ -9,8 +9,11 @@ export default function Register() {
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/register", { email, password });
-      setMessage(res.data.message);
+      const res = await axios.post(
+        "https://sulekha-clonee-3.onrender.com/api/auth/register",
+        { email, password }
+      );
+      setMessage(res.data.message || "Registration successful");
     } catch (err) {
       setMessage(err.response?.data?.error || "Registration failed");
     }
@@ -35,7 +38,9 @@ export default function Register() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        <button className="bg-green-600 text-white px-4 py-2 rounded">Register</button>
+        <button className="bg-green-600 text-white px-4 py-2 rounded">
+          Register
+        </button>
       </form>
     </div>
   );
